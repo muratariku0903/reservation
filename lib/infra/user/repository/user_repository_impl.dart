@@ -1,7 +1,7 @@
 import '../../../domain/user/model/user.dart';
 import '../../../domain/user/repository/user_repository_base.dart';
 
-class UserRepositoryImpl implements UserRepository {
+class UserRepositoryImpl implements UserRepositoryBase {
   @override
   Future<void> add(User user) async {}
 
