@@ -1,7 +1,8 @@
+import 'package:logger/logger.dart';
+
 import '../../domain/user/factory/user_factory_base.dart';
 import '../../domain/user/model/user.dart';
 import '../../domain/user/repository/user_repository_base.dart';
-import 'package:logger/logger.dart';
 
 class UserService {
   UserService({required this.repository, required this.factory});
