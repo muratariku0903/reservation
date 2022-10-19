@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'presentation/pages/home/home_page.dart';
+import 'presentation/pages/reservation/reservation_page.dart';
 import 'presentation/pages/signup/signup_page.dart';
 
 void main() {
@@ -20,6 +21,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => const HomePage(),
         '/signup': (context) => const SignUpPage(),
+        '/reservation': (context) => const ReservationPage(),
       },
     );
   }
