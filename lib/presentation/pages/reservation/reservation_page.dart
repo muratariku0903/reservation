@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:reservation/presentation/widget/signup/form/form.dart';
 
 import '../../widget/common/page_title.dart';
+import '../../widget/reservation/form/reservation_calendar.dart';
 
 class ReservationPage extends StatelessWidget {
   const ReservationPage({Key? key}) : super(key: key);
@@ -23,10 +23,11 @@ class ReservationPage extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: const [
             PageTitle(title: 'Reservation Page'),
             SizedBox(height: 20),
-            SignUpForm(),
+            ReservationCalendar(),
           ],
         ),
       ),

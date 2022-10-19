@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:reservation/presentation/widget/signup/form/form.dart';
+import 'package:reservation/presentation/widget/signup/form/signup_form.dart';
 
 import '../../widget/common/page_title.dart';
 

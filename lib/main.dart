@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:syncfusion_localizations/syncfusion_localizations.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'presentation/pages/home/home_page.dart';
 import 'presentation/pages/reservation/reservation_page.dart';
@@ -17,6 +19,13 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Reservation Sys',
       theme: ThemeData(primarySwatch: Colors.blue),
       debugShowCheckedModeBanner: false,
+      localizationsDelegates: const [
+        SfGlobalLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [Locale('ja'), Locale('en')],
       initialRoute: '/',
       routes: {
         '/': (context) => const HomePage(),
