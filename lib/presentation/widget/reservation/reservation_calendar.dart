@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:reservation/presentation/widget/reservation/data.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class ReservationCalendar extends StatefulWidget {
@@ -10,6 +11,8 @@ class ReservationCalendar extends StatefulWidget {
 }
 
 class _ReservationCalendarState extends State<ReservationCalendar> {
+  DateTime focusedDay = DateTime.now();
+
   @override
   Widget build(BuildContext context) {
     print('build');
@@ -17,19 +20,24 @@ class _ReservationCalendarState extends State<ReservationCalendar> {
     return Column(
       children: [
         TableCalendar(
-          focusedDay: DateTime.now(),
+          // 最終的にこれもクラス化したいな
+          focusedDay: focusedDay,
           firstDay: DateTime.utc(2010, 1, 1),
           lastDay: DateTime.utc(2030, 1, 1),
           locale: 'ja_JP',
           rowHeight: 70,
           daysOfWeekHeight: 50,
           headerStyle: CustomCalendarStyle.header(),
+          eventLoader: createSampleData, // headerはheaderTitleBuilderでカスタマイズできるかも
           calendarBuilders: const CalendarBuilders(
             todayBuilder: CustomCalendarBuilders.todayBuilder,
-            defaultBuilder: CustomCalendarBuilders.defaultBuilder,
             outsideBuilder: CustomCalendarBuilders.outsideBuilder,
+            disabledBuilder: CustomCalendarBuilders.disabledBuilder,
+            defaultBuilder: CustomCalendarBuilders.defaultBuilder,
+            markerBuilder: CustomCalendarBuilders.markerBuilder,
             dowBuilder: CustomCalendarBuilders.daysOfWeekBuilder,
           ),
+          enabledDayPredicate: (day) => day.month == focusedDay.month,
         )
       ],
     );
@@ -73,6 +81,29 @@ class CustomCalendarBuilders {
 
   static Widget outsideBuilder(BuildContext context, DateTime day, DateTime focusedDay) {
     return Container();
+  }
+
+  static Widget disabledBuilder(BuildContext context, DateTime day, DateTime focusedDay) {
+    return Container();
+  }
+
+  static Widget markerBuilder(BuildContext context, DateTime day, List<Availability> availabilityList) {
+    Availability availability = availabilityList[0];
+    // bool morning = availability.morning;
+    // bool noon = availability.noon;
+    // bool afternoon = availability.afternoon;
+
+    int cnt = 0;
+    if (availability.morning) cnt++;
+    if (availability.noon) cnt++;
+    if (availability.afternoon) cnt++;
+
+    String mark = '';
+    if (cnt == 3) mark = '○';
+    if (cnt == 1 || cnt == 2) mark = '△';
+    if (cnt == 0) mark = '×';
+
+    return const Text('△');
   }
 
   static Widget daysOfWeekBuilder(BuildContext context, DateTime day) {

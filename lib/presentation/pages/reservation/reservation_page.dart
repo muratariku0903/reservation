@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../widget/common/page_title.dart';
-import '../../widget/reservation/form/reservation_calendar.dart';
+import '../../widget/reservation/reservation_calendar.dart';
 
 class ReservationPage extends StatelessWidget {
   const ReservationPage({Key? key}) : super(key: key);
