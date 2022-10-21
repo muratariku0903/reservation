@@ -20,6 +20,8 @@ dependencies:
   hooks_riverpod: ^2.0.2
   syncfusion_flutter_calendar: ^20.3.50
   syncfusion_localizations: ^20.3.50
+  table_calendar: ^3.0.7
+  intl: ^0.17.0
 
 dev_dependencies:
   flutter_test:

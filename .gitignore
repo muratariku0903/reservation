@@ -47,3 +47,5 @@ windows
 linux
 macos
 
+**/tmp.*
+
