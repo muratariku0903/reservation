@@ -17,7 +17,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Reservation Sys',
-      theme: ThemeData(primarySwatch: Colors.blue),
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        fontFamily: "NotoSansJP",
+      ),
       debugShowCheckedModeBanner: false,
       localizationsDelegates: const [
         SfGlobalLocalizations.delegate,

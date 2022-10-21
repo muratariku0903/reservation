@@ -89,21 +89,18 @@ class CustomCalendarBuilders {
 
   static Widget markerBuilder(BuildContext context, DateTime day, List<Availability> availabilityList) {
     Availability availability = availabilityList[0];
-    // bool morning = availability.morning;
-    // bool noon = availability.noon;
-    // bool afternoon = availability.afternoon;
-
     int cnt = 0;
     if (availability.morning) cnt++;
     if (availability.noon) cnt++;
     if (availability.afternoon) cnt++;
+    print([availability.morning, availability.noon, availability.afternoon]);
 
     String mark = '';
     if (cnt == 3) mark = '○';
     if (cnt == 1 || cnt == 2) mark = '△';
     if (cnt == 0) mark = '×';
 
-    return const Text('△');
+    return Text(mark);
   }
 
   static Widget daysOfWeekBuilder(BuildContext context, DateTime day) {
