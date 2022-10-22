@@ -20,15 +20,17 @@ class ReservationPage extends StatelessWidget {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
-            PageTitle(title: 'Reservation Page'),
-            SizedBox(height: 20),
-            ReservationCalendar(),
-          ],
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: const [
+              PageTitle(title: 'Reservation Page'),
+              SizedBox(height: 20),
+              ReservationCalendar(),
+            ],
+          ),
         ),
       ),
     );

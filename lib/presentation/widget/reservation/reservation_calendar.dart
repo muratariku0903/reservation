@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:reservation/presentation/widget/reservation/data.dart';
 import 'package:table_calendar/table_calendar.dart';
+
+import 'data.dart';
 
 class ReservationCalendar extends StatefulWidget {
   const ReservationCalendar({Key? key}) : super(key: key);
@@ -11,35 +12,144 @@ class ReservationCalendar extends StatefulWidget {
 }
 
 class _ReservationCalendarState extends State<ReservationCalendar> {
-  DateTime focusedDay = DateTime.now();
+  final int _msPerHour = 60 * 60 * 1000;
+  final int _msPerDay = 24 * 60 * 60 * 1000;
+  final AvailabilityFactory availabilityFactory = AvailabilityFactory();
+  DateTime _focusedDay = DateTime.now();
+  List<AvailabilityItem> _selectedAvailabilityItems = [];
+  AvailabilityItem? _selectedAvailabilityItem;
+  Map<int, Availability> _sampleData = {};
+
+  @override
+  void initState() {
+    _sampleData = _createSampleData(_focusedDay);
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     print('build');
 
-    return Column(
-      children: [
-        TableCalendar(
-          // 最終的にこれもクラス化したいな
-          focusedDay: focusedDay,
-          firstDay: DateTime.utc(2010, 1, 1),
-          lastDay: DateTime.utc(2030, 1, 1),
-          locale: 'ja_JP',
-          rowHeight: 70,
-          daysOfWeekHeight: 50,
-          headerStyle: CustomCalendarStyle.header(),
-          eventLoader: createSampleData, // headerはheaderTitleBuilderでカスタマイズできるかも
-          calendarBuilders: const CalendarBuilders(
-            todayBuilder: CustomCalendarBuilders.todayBuilder,
-            outsideBuilder: CustomCalendarBuilders.outsideBuilder,
-            disabledBuilder: CustomCalendarBuilders.disabledBuilder,
-            defaultBuilder: CustomCalendarBuilders.defaultBuilder,
-            markerBuilder: CustomCalendarBuilders.markerBuilder,
-            dowBuilder: CustomCalendarBuilders.daysOfWeekBuilder,
+    return Container(
+      height: _selectedAvailabilityItems.isNotEmpty ? MediaQuery.of(context).size.height : null,
+      color: Colors.white,
+      child: Column(
+        children: [
+          TableCalendar(
+            focusedDay: _focusedDay,
+            firstDay: DateTime.utc(2010, 1, 1), // TODO: 要検討
+            lastDay: DateTime.utc(2030, 1, 1), // TODO: 要検討
+            locale: 'ja_JP',
+            rowHeight: 70,
+            daysOfWeekHeight: 50,
+            headerStyle: CustomCalendarStyle.header(), // headerはheaderTitleBuilderでカスタマイズできるかも
+            eventLoader: (day) => [_sampleData[day.millisecondsSinceEpoch - (_msPerHour * 9)]!],
+            calendarBuilders: const CalendarBuilders(
+              todayBuilder: CustomCalendarBuilders.todayBuilder,
+              outsideBuilder: CustomCalendarBuilders.outsideBuilder,
+              disabledBuilder: CustomCalendarBuilders.disabledBuilder,
+              defaultBuilder: CustomCalendarBuilders.defaultBuilder,
+              markerBuilder: CustomCalendarBuilders.markerBuilder,
+              dowBuilder: CustomCalendarBuilders.daysOfWeekBuilder,
+            ),
+            enabledDayPredicate: (day) => day.month == _focusedDay.month,
+            onDaySelected: (selectedDay, focusedDay) {
+              final Availability availability = _sampleData[selectedDay.millisecondsSinceEpoch - (_msPerHour * 9)]!;
+              setState(() {
+                _selectedAvailabilityItems = [availability.morning, availability.noon, availability.afternoon];
+              });
+            },
+            onPageChanged: (focusedDay) {
+              setState(() {
+                // reset?
+                _focusedDay = focusedDay;
+                _sampleData = _createSampleData(focusedDay);
+                _selectedAvailabilityItems = [];
+                _selectedAvailabilityItem = null;
+              });
+            },
           ),
-          enabledDayPredicate: (day) => day.month == focusedDay.month,
-        )
-      ],
+          const SizedBox(height: 20),
+          if (_selectedAvailabilityItems.isNotEmpty) ...[
+            Expanded(child: _createListView(_selectedAvailabilityItems)),
+            const SizedBox(height: 20)
+          ],
+          Container(
+            alignment: Alignment.centerLeft,
+            child: const Text(
+              '選択された日時',
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          if (_selectedAvailabilityItem != null) ...[
+            const SizedBox(height: 10),
+            _createResult(_selectedAvailabilityItem!),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Map<int, Availability> _createSampleData(DateTime date) {
+    Map<int, Availability> data = {};
+    int focusYear = date.year;
+    int focusMonth = date.month;
+    int start = DateTime(focusYear, focusMonth, 1).millisecondsSinceEpoch;
+    int end = DateTime(focusYear, focusMonth + 1, 0).millisecondsSinceEpoch;
+    for (var ms = start; ms <= end; ms += _msPerDay) {
+      data[ms] = availabilityFactory.create(ms);
+    }
+
+    return data;
+  }
+
+  Widget _createListView(List<AvailabilityItem> availabilityItems) {
+    return ListView.builder(
+      itemCount: availabilityItems.length,
+      itemBuilder: (context, idx) {
+        AvailabilityItem availabilityItem = availabilityItems[idx];
+
+        return _createCard(availabilityItem);
+      },
+    );
+  }
+
+  Widget _createCard(AvailabilityItem availabilityItem) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedAvailabilityItem = availabilityItem;
+        });
+      },
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('${availabilityItem.startHour()}:00~${availabilityItem.endHour()}:00'),
+              Text('空き状況 :  ${availabilityItem.mark()}'),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _createResult(AvailabilityItem availabilityItem) {
+    int year = availabilityItem.year();
+    int month = availabilityItem.month();
+    int day = availabilityItem.day();
+    int startH = availabilityItem.startHour();
+    int endH = availabilityItem.endHour();
+    String text = '$year年 $month月 $day日 $startH:00~$endH:00';
+
+    return Container(
+      alignment: Alignment.centerLeft,
+      child: Text(text),
     );
   }
 }
@@ -89,18 +199,14 @@ class CustomCalendarBuilders {
 
   static Widget markerBuilder(BuildContext context, DateTime day, List<Availability> availabilityList) {
     Availability availability = availabilityList[0];
-    int cnt = 0;
-    if (availability.morning) cnt++;
-    if (availability.noon) cnt++;
-    if (availability.afternoon) cnt++;
-    print([availability.morning, availability.noon, availability.afternoon]);
 
-    String mark = '';
-    if (cnt == 3) mark = '○';
-    if (cnt == 1 || cnt == 2) mark = '△';
-    if (cnt == 0) mark = '×';
-
-    return Text(mark);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Text(
+        availability.mark(),
+        style: const TextStyle(fontWeight: FontWeight.bold),
+      ),
+    );
   }
 
   static Widget daysOfWeekBuilder(BuildContext context, DateTime day) {
