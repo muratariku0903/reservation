@@ -3,7 +3,6 @@ include: package:flutter_lints/flutter.yaml
 linter:
   rules:
 
-
 dart_code_metrics:
   anti-patterns:
     - long-method
@@ -15,6 +14,8 @@ dart_code_metrics:
     source-lines-of-code: 50
   metrics-exclude:
     - test/**
+    - lib/**/**.freezed.dart
+    - lib/**/**.g.dart
   rules:
     - newline-before-return
     - no-boolean-literal-compare
