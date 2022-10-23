@@ -12,8 +12,6 @@ class ReservationCalendar extends StatefulWidget {
 }
 
 class _ReservationCalendarState extends State<ReservationCalendar> {
-  final int _msPerHour = 60 * 60 * 1000;
-  final int _msPerDay = 24 * 60 * 60 * 1000;
   final AvailabilityFactory availabilityFactory = AvailabilityFactory();
   DateTime _focusedDay = DateTime.now();
   List<AvailabilityItem> _selectedAvailabilityItems = [];
@@ -28,8 +26,6 @@ class _ReservationCalendarState extends State<ReservationCalendar> {
 
   @override
   Widget build(BuildContext context) {
-    print('build');
-
     return Container(
       height: _selectedAvailabilityItems.isNotEmpty ? MediaQuery.of(context).size.height : null,
       color: Colors.white,
@@ -43,7 +39,7 @@ class _ReservationCalendarState extends State<ReservationCalendar> {
             rowHeight: 70,
             daysOfWeekHeight: 50,
             headerStyle: CustomCalendarStyle.header(), // headerはheaderTitleBuilderでカスタマイズできるかも
-            eventLoader: (day) => [_sampleData[day.millisecondsSinceEpoch - (_msPerHour * 9)]!],
+            eventLoader: (day) => [_sampleData[day.millisecondsSinceEpoch]!],
             calendarBuilders: const CalendarBuilders(
               todayBuilder: CustomCalendarBuilders.todayBuilder,
               outsideBuilder: CustomCalendarBuilders.outsideBuilder,
@@ -54,14 +50,13 @@ class _ReservationCalendarState extends State<ReservationCalendar> {
             ),
             enabledDayPredicate: (day) => day.month == _focusedDay.month,
             onDaySelected: (selectedDay, focusedDay) {
-              final Availability availability = _sampleData[selectedDay.millisecondsSinceEpoch - (_msPerHour * 9)]!;
+              final Availability availability = _sampleData[selectedDay.millisecondsSinceEpoch]!;
               setState(() {
                 _selectedAvailabilityItems = [availability.morning, availability.noon, availability.afternoon];
               });
             },
             onPageChanged: (focusedDay) {
               setState(() {
-                // reset?
                 _focusedDay = focusedDay;
                 _sampleData = _createSampleData(focusedDay);
                 _selectedAvailabilityItems = [];
@@ -94,12 +89,14 @@ class _ReservationCalendarState extends State<ReservationCalendar> {
   }
 
   Map<int, Availability> _createSampleData(DateTime date) {
-    Map<int, Availability> data = {};
+    int msPerHour = 1000 * 60 * 60;
+    int msPerDay = msPerHour * 24;
     int year = date.year;
     int month = date.month;
-    int start = DateTime(year, month, 1).millisecondsSinceEpoch;
-    int end = DateTime(year, month + 1, 0).millisecondsSinceEpoch;
-    for (var ms = start; ms <= end; ms += _msPerDay) {
+    int start = DateTime(year, month, 1).millisecondsSinceEpoch + msPerHour * 9;
+    int end = DateTime(year, month + 1, 0).millisecondsSinceEpoch + msPerHour * 9;
+    Map<int, Availability> data = {};
+    for (var ms = start; ms <= end; ms += msPerDay) {
       data[ms] = availabilityFactory.create(ms);
     }
 
