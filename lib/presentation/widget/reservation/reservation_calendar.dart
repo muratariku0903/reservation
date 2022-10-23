@@ -174,16 +174,12 @@ class CustomCalendarStyle {
 
 class CustomCalendarBuilders {
   static Widget todayBuilder(BuildContext context, DateTime day, DateTime focusedDay) {
-    return CustomCalendarCell(
-      dayText: day.day.toString(),
-      dayTextWeight: FontWeight.bold,
-      padding: const EdgeInsets.all(5),
-      encircle: true,
-    );
+    return Container();
   }
 
   static Widget defaultBuilder(BuildContext context, DateTime day, DateTime focusedDay) {
-    return CustomCalendarCell(dayText: day.day.toString());
+    return Container();
+    // return CustomCalendarDayText(dayText: day.day.toString());
   }
 
   static Widget outsideBuilder(BuildContext context, DateTime day, DateTime focusedDay) {
@@ -196,13 +192,33 @@ class CustomCalendarBuilders {
 
   static Widget markerBuilder(BuildContext context, DateTime day, List<Availability> availabilityList) {
     Availability availability = availabilityList[0];
+    String markText = availability.mark();
+    bool isAvailable = markText != '×';
+    bool isToday = _isToday(day);
+    Color textColor = isAvailable ? Colors.black : Colors.black38;
+    FontWeight textWeight = isToday ? FontWeight.bold : FontWeight.w700;
+    Color bgc = isAvailable ? Colors.white : Colors.grey;
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Text(
-        availability.mark(),
-        style: const TextStyle(fontWeight: FontWeight.bold),
+    CustomCalendarDayText dayText = CustomCalendarDayText(
+      dayText: day.day.toString(),
+      dayTextColor: textColor,
+      dayTextWeight: textWeight,
+      encircle: isToday,
+    );
+
+    Text mark = Text(
+      markText,
+      style: TextStyle(
+        fontWeight: FontWeight.bold,
+        color: textColor,
       ),
+    );
+
+    return CustomCalendarCell(
+      dayText: dayText,
+      mark: mark,
+      bgc: bgc,
+      gap: isToday ? 2 : 5,
     );
   }
 
@@ -221,10 +237,52 @@ class CustomCalendarBuilders {
       ),
     );
   }
+
+  static bool _isToday(DateTime day) {
+    DateTime today = DateTime.now();
+
+    return day.year == today.year && day.month == today.month && day.day == today.day;
+  }
 }
 
 class CustomCalendarCell extends StatelessWidget {
   const CustomCalendarCell({
+    Key? key,
+    required this.dayText,
+    required this.mark,
+    double? gap,
+    Color? bgc,
+    EdgeInsetsGeometry? padding,
+  })  : gap = gap ?? 5,
+        bgc = bgc ?? Colors.white,
+        padding = padding ?? const EdgeInsets.all(5),
+        super(key: key);
+
+  final CustomCalendarDayText dayText;
+  final Text mark;
+  final double gap;
+  final Color bgc;
+  final EdgeInsetsGeometry padding;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      padding: padding,
+      decoration: BoxDecoration(color: bgc),
+      child: Column(
+        children: [
+          dayText,
+          SizedBox(height: gap),
+          mark,
+        ],
+      ),
+    );
+  }
+}
+
+class CustomCalendarDayText extends StatelessWidget {
+  const CustomCalendarDayText({
     Key? key,
     required this.dayText,
     Color? dayTextColor,
@@ -253,13 +311,7 @@ class CustomCalendarCell extends StatelessWidget {
       ),
     );
 
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 250),
-      padding: padding,
-      decoration: BoxDecoration(border: Border.all()),
-      alignment: Alignment.topCenter,
-      child: encircle ? Encircle(text: text) : text,
-    );
+    return encircle ? Encircle(text: text) : text;
   }
 }
 
