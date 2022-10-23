@@ -95,10 +95,10 @@ class _ReservationCalendarState extends State<ReservationCalendar> {
 
   Map<int, Availability> _createSampleData(DateTime date) {
     Map<int, Availability> data = {};
-    int focusYear = date.year;
-    int focusMonth = date.month;
-    int start = DateTime(focusYear, focusMonth, 1).millisecondsSinceEpoch;
-    int end = DateTime(focusYear, focusMonth + 1, 0).millisecondsSinceEpoch;
+    int year = date.year;
+    int month = date.month;
+    int start = DateTime(year, month, 1).millisecondsSinceEpoch;
+    int end = DateTime(year, month + 1, 0).millisecondsSinceEpoch;
     for (var ms = start; ms <= end; ms += _msPerDay) {
       data[ms] = availabilityFactory.create(ms);
     }

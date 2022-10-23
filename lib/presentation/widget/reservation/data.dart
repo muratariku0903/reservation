@@ -40,14 +40,6 @@ class AvailabilityItem {
   final int endDate;
   final int availabilityLevel; // enum使えそう
 
-  int startHour() {
-    return DateTime.fromMillisecondsSinceEpoch(startDate).hour;
-  }
-
-  int endHour() {
-    return DateTime.fromMillisecondsSinceEpoch(endDate).hour;
-  }
-
   int year() {
     return DateTime.fromMillisecondsSinceEpoch(startDate).year;
   }
@@ -58,6 +50,14 @@ class AvailabilityItem {
 
   int day() {
     return DateTime.fromMillisecondsSinceEpoch(startDate).day;
+  }
+
+  int startHour() {
+    return DateTime.fromMillisecondsSinceEpoch(startDate).hour;
+  }
+
+  int endHour() {
+    return DateTime.fromMillisecondsSinceEpoch(endDate).hour;
   }
 
   String mark() {
