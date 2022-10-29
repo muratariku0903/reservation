@@ -10,23 +10,16 @@ class Availability {
   final AvailabilityItem noon;
   final AvailabilityItem afternoon;
 
-  String mark() {
-    int totalLevel = calcTotalAvailabilityLevel();
-
-    String mark = '';
-    if (totalLevel >= 5) {
-      mark = '○';
-    } else if (totalLevel <= 1) {
-      mark = '×';
-    } else {
-      mark = '△';
-    }
-
-    return mark;
+  bool isAvailable() {
+    return level() > 0;
   }
 
-  int calcTotalAvailabilityLevel() {
-    return morning.availabilityLevel + noon.availabilityLevel + afternoon.availabilityLevel;
+  int level() {
+    return (morning.availabilityLevel + noon.availabilityLevel + afternoon.availabilityLevel) ~/ 3;
+  }
+
+  List<AvailabilityItem> values() {
+    return [morning, noon, afternoon];
   }
 }
 
@@ -59,19 +52,6 @@ class AvailabilityItem {
   int endHour() {
     return DateTime.fromMillisecondsSinceEpoch(endDate).hour;
   }
-
-  String mark() {
-    switch (availabilityLevel) {
-      case 0:
-        return '×';
-      case 1:
-        return '△';
-      case 2:
-        return '○';
-      default:
-        return '';
-    }
-  }
 }
 
 class AvailabilityFactory {
@@ -96,4 +76,20 @@ class AvailabilityFactory {
       ),
     );
   }
+}
+
+Map<int, Availability> createSampleData(DateTime date) {
+  AvailabilityFactory factory = AvailabilityFactory();
+  int msPerHour = 1000 * 60 * 60;
+  int msPerDay = msPerHour * 24;
+  int year = date.year;
+  int month = date.month;
+  int start = DateTime(year, month, 1).millisecondsSinceEpoch + msPerHour * 9;
+  int end = DateTime(year, month + 1, 0).millisecondsSinceEpoch + msPerHour * 9;
+  Map<int, Availability> data = {};
+  for (var ms = start; ms <= end; ms += msPerDay) {
+    data[ms] = factory.create(ms);
+  }
+
+  return data;
 }

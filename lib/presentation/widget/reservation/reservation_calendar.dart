@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 
+import '../common/encircle_text.dart';
 import 'data.dart';
 
 class ReservationCalendar extends StatefulWidget {
@@ -12,7 +13,6 @@ class ReservationCalendar extends StatefulWidget {
 }
 
 class _ReservationCalendarState extends State<ReservationCalendar> {
-  final AvailabilityFactory availabilityFactory = AvailabilityFactory();
   DateTime _focusedDay = DateTime.now();
   List<AvailabilityItem> _selectedAvailabilityItems = [];
   AvailabilityItem? _selectedAvailabilityItem;
@@ -20,96 +20,127 @@ class _ReservationCalendarState extends State<ReservationCalendar> {
 
   @override
   void initState() {
-    _sampleData = _createSampleData(_focusedDay);
+    _sampleData = createSampleData(_focusedDay);
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: _selectedAvailabilityItems.isNotEmpty ? MediaQuery.of(context).size.height : null,
-      color: Colors.white,
-      child: Column(
-        children: [
-          TableCalendar(
-            focusedDay: _focusedDay,
-            firstDay: DateTime.utc(2010, 1, 1), // TODO: 要検討
-            lastDay: DateTime.utc(2030, 1, 1), // TODO: 要検討
-            locale: 'ja_JP',
-            rowHeight: 70,
-            daysOfWeekHeight: 50,
-            headerStyle: CustomCalendarStyle.header(), // headerはheaderTitleBuilderでカスタマイズできるかも
-            eventLoader: (day) => [_sampleData[day.millisecondsSinceEpoch]!],
-            calendarBuilders: const CalendarBuilders(
-              todayBuilder: CustomCalendarBuilders.todayBuilder,
-              outsideBuilder: CustomCalendarBuilders.outsideBuilder,
-              disabledBuilder: CustomCalendarBuilders.disabledBuilder,
-              defaultBuilder: CustomCalendarBuilders.defaultBuilder,
-              markerBuilder: CustomCalendarBuilders.markerBuilder,
-              dowBuilder: CustomCalendarBuilders.daysOfWeekBuilder,
-            ),
-            enabledDayPredicate: (day) => day.month == _focusedDay.month,
-            onDaySelected: (selectedDay, focusedDay) {
-              final Availability availability = _sampleData[selectedDay.millisecondsSinceEpoch]!;
-              setState(() {
-                _selectedAvailabilityItems = [availability.morning, availability.noon, availability.afternoon];
-              });
-            },
-            onPageChanged: (focusedDay) {
-              setState(() {
-                _focusedDay = focusedDay;
-                _sampleData = _createSampleData(focusedDay);
-                _selectedAvailabilityItems = [];
-                _selectedAvailabilityItem = null;
-              });
-            },
+    return Column(
+      children: [
+        TableCalendar(
+          focusedDay: _focusedDay,
+          firstDay: DateTime.utc(2010, 1, 1), // TODO: 要検討
+          lastDay: DateTime.utc(2030, 1, 1), // TODO: 要検討
+          locale: 'ja_JP',
+          rowHeight: 70,
+          daysOfWeekHeight: 50,
+          headerStyle: _createHeaderStyle(), // headerはheaderTitleBuilderでカスタマイズできるかも
+          eventLoader: (day) => [_sampleData[day.millisecondsSinceEpoch]!],
+          calendarBuilders: CalendarBuilders(
+            todayBuilder: (context, day, focusedDay) => Container(),
+            outsideBuilder: (context, day, focusedDay) => Container(),
+            disabledBuilder: (context, day, focusedDay) => Container(),
+            defaultBuilder: (context, day, focusedDay) => Container(),
+            markerBuilder: _markerBuilder,
+            dowBuilder: _daysOfWeekBuilder,
           ),
-          const SizedBox(height: 20),
-          if (_selectedAvailabilityItems.isNotEmpty) ...[
-            Expanded(child: _createListView(_selectedAvailabilityItems)),
-            const SizedBox(height: 20)
-          ],
-          Container(
-            alignment: Alignment.centerLeft,
-            child: const Text(
-              '選択された日時',
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          if (_selectedAvailabilityItem != null) ...[
-            const SizedBox(height: 10),
-            _createResult(_selectedAvailabilityItem!),
-          ],
+          enabledDayPredicate: (day) => day.month == _focusedDay.month,
+          onDaySelected: (selectedDay, focusedDay) {
+            final Availability availability = _sampleData[selectedDay.millisecondsSinceEpoch]!;
+            setState(() {
+              _selectedAvailabilityItems = availability.values();
+            });
+          },
+          onPageChanged: (focusedDay) {
+            setState(() {
+              _focusedDay = focusedDay;
+              _sampleData = createSampleData(focusedDay);
+              _selectedAvailabilityItems = [];
+              _selectedAvailabilityItem = null;
+            });
+          },
+        ),
+        const SizedBox(height: 20),
+        if (_selectedAvailabilityItems.isNotEmpty) ...[
+          _createListView(_selectedAvailabilityItems),
+          const SizedBox(height: 20)
         ],
+        if (_selectedAvailabilityItem != null) ...[
+          const SizedBox(height: 10),
+          _createResult(_selectedAvailabilityItem!),
+        ],
+      ],
+    );
+  }
+
+  HeaderStyle _createHeaderStyle() {
+    Color textColor = Colors.white;
+
+    return HeaderStyle(
+      titleCentered: true,
+      formatButtonVisible: false,
+      headerPadding: const EdgeInsets.all(0),
+      titleTextStyle: TextStyle(
+        color: textColor,
+        fontWeight: FontWeight.bold,
+      ),
+      decoration: const BoxDecoration(
+        color: Colors.grey,
+      ),
+      leftChevronIcon: Icon(Icons.chevron_left, color: textColor),
+      rightChevronIcon: Icon(Icons.chevron_right, color: textColor),
+    );
+  }
+
+  Widget _daysOfWeekBuilder(BuildContext context, DateTime day) {
+    final languageCode = Localizations.localeOf(context).languageCode;
+    final text =
+        const DaysOfWeekStyle().dowTextFormatter?.call(day, languageCode) ?? DateFormat.E(languageCode).format(day);
+
+    return Center(
+      child: Text(
+        text,
+        style: const TextStyle(
+          color: Colors.black,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }
 
-  Map<int, Availability> _createSampleData(DateTime date) {
-    int msPerHour = 1000 * 60 * 60;
-    int msPerDay = msPerHour * 24;
-    int year = date.year;
-    int month = date.month;
-    int start = DateTime(year, month, 1).millisecondsSinceEpoch + msPerHour * 9;
-    int end = DateTime(year, month + 1, 0).millisecondsSinceEpoch + msPerHour * 9;
-    Map<int, Availability> data = {};
-    for (var ms = start; ms <= end; ms += msPerDay) {
-      data[ms] = availabilityFactory.create(ms);
-    }
+  Widget _markerBuilder(BuildContext context, DateTime day, List<Availability> availabilityList) {
+    Availability availability = availabilityList[0];
+    bool isAvailable = availability.isAvailable();
+    bool isToday = _isToday(day);
 
-    return data;
+    CustomCalendarDayText customDayText = CustomCalendarDayText(
+      dayText: day.day.toString(),
+      dayTextColor: isAvailable ? Colors.black : Colors.black38,
+      dayTextWeight: isToday ? FontWeight.bold : FontWeight.w700,
+      encircle: isToday,
+    );
+
+    CustomCalendarMark customMark = CustomCalendarMark(
+      markText: _convertLevelToMark(availability.level()),
+      fontWeight: isAvailable ? FontWeight.bold : FontWeight.normal,
+    );
+
+    return CustomCalendarCell(
+      dayText: customDayText,
+      mark: customMark,
+      bgc: isAvailable ? Colors.white : Colors.grey,
+      gap: isToday ? 2 : 5,
+    );
   }
 
   Widget _createListView(List<AvailabilityItem> availabilityItems) {
     return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
       itemCount: availabilityItems.length,
       itemBuilder: (context, idx) {
-        AvailabilityItem availabilityItem = availabilityItems[idx];
-
-        return _createCard(availabilityItem);
+        return _createCard(availabilityItems[idx]);
       },
     );
   }
@@ -128,7 +159,7 @@ class _ReservationCalendarState extends State<ReservationCalendar> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('${availabilityItem.startHour()}:00~${availabilityItem.endHour()}:00'),
-              Text('空き状況 :  ${availabilityItem.mark()}'),
+              Text('空き状況 :  ${_convertLevelToMark(availabilityItem.availabilityLevel)}'),
             ],
           ),
         ),
@@ -146,102 +177,36 @@ class _ReservationCalendarState extends State<ReservationCalendar> {
 
     return Container(
       alignment: Alignment.centerLeft,
-      child: Text(text),
-    );
-  }
-}
-
-class CustomCalendarStyle {
-  static HeaderStyle header() {
-    Color textColor = Colors.white;
-
-    return HeaderStyle(
-      titleCentered: true,
-      formatButtonVisible: false,
-      headerPadding: const EdgeInsets.all(0),
-      titleTextStyle: TextStyle(
-        color: textColor,
-        fontWeight: FontWeight.bold,
-      ),
-      decoration: const BoxDecoration(
-        color: Colors.grey,
-      ),
-      leftChevronIcon: Icon(Icons.chevron_left, color: textColor),
-      rightChevronIcon: Icon(Icons.chevron_right, color: textColor),
-    );
-  }
-}
-
-class CustomCalendarBuilders {
-  static Widget todayBuilder(BuildContext context, DateTime day, DateTime focusedDay) {
-    return Container();
-  }
-
-  static Widget defaultBuilder(BuildContext context, DateTime day, DateTime focusedDay) {
-    return Container();
-    // return CustomCalendarDayText(dayText: day.day.toString());
-  }
-
-  static Widget outsideBuilder(BuildContext context, DateTime day, DateTime focusedDay) {
-    return Container();
-  }
-
-  static Widget disabledBuilder(BuildContext context, DateTime day, DateTime focusedDay) {
-    return Container();
-  }
-
-  static Widget markerBuilder(BuildContext context, DateTime day, List<Availability> availabilityList) {
-    Availability availability = availabilityList[0];
-    String markText = availability.mark();
-    bool isAvailable = markText != '×';
-    bool isToday = _isToday(day);
-    Color textColor = isAvailable ? Colors.black : Colors.black38;
-    FontWeight textWeight = isToday ? FontWeight.bold : FontWeight.w700;
-    Color bgc = isAvailable ? Colors.white : Colors.grey;
-
-    CustomCalendarDayText dayText = CustomCalendarDayText(
-      dayText: day.day.toString(),
-      dayTextColor: textColor,
-      dayTextWeight: textWeight,
-      encircle: isToday,
-    );
-
-    Text mark = Text(
-      markText,
-      style: TextStyle(
-        fontWeight: FontWeight.bold,
-        color: textColor,
-      ),
-    );
-
-    return CustomCalendarCell(
-      dayText: dayText,
-      mark: mark,
-      bgc: bgc,
-      gap: isToday ? 2 : 5,
-    );
-  }
-
-  static Widget daysOfWeekBuilder(BuildContext context, DateTime day) {
-    final languageCode = Localizations.localeOf(context).languageCode;
-    final text =
-        const DaysOfWeekStyle().dowTextFormatter?.call(day, languageCode) ?? DateFormat.E(languageCode).format(day);
-
-    return Center(
-      child: Text(
-        text,
-        style: const TextStyle(
-          color: Colors.black,
-          fontWeight: FontWeight.bold,
-        ),
+      child: Column(
+        children: [
+          const Text(
+            '選択された日時',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Text(text),
+        ],
       ),
     );
   }
 
   static bool _isToday(DateTime day) {
-    DateTime today = DateTime.now();
+    return isSameDay(DateTime.now(), day);
+  }
 
-    return day.year == today.year && day.month == today.month && day.day == today.day;
+  static _convertLevelToMark(int level) {
+    switch (level) {
+      case 0:
+        return '×';
+      case 1:
+        return '△';
+      case 2:
+        return '○';
+      default:
+        return '';
+    }
   }
 }
 
@@ -259,7 +224,7 @@ class CustomCalendarCell extends StatelessWidget {
         super(key: key);
 
   final CustomCalendarDayText dayText;
-  final Text mark;
+  final CustomCalendarMark mark;
   final double gap;
   final Color bgc;
   final EdgeInsetsGeometry padding;
@@ -311,49 +276,28 @@ class CustomCalendarDayText extends StatelessWidget {
       ),
     );
 
-    return encircle ? Encircle(text: text) : text;
+    return encircle ? EncircleText(text: text) : text;
   }
 }
 
-class Encircle extends StatelessWidget {
-  const Encircle({
-    Key? key,
-    required this.text,
-    Color? bgc,
-    double? width,
-    double? height,
-    EdgeInsetsGeometry? margin,
-    EdgeInsetsGeometry? padding,
-    BoxShape? shape,
-  })  : width = width ?? 25,
-        height = height ?? 25,
-        margin = margin ?? EdgeInsets.zero,
-        padding = padding ?? const EdgeInsets.all(0),
-        shape = shape ?? BoxShape.circle,
-        bgc = bgc ?? Colors.red,
+class CustomCalendarMark extends StatelessWidget {
+  const CustomCalendarMark({Key? key, required this.markText, FontWeight? fontWeight, Color? markTextColor})
+      : fontWeight = fontWeight ?? FontWeight.bold,
+        markTextColor = markTextColor ?? Colors.black,
         super(key: key);
 
-  final double width;
-  final double height;
-  final EdgeInsetsGeometry margin;
-  final EdgeInsetsGeometry padding;
-  final BoxShape shape;
-  final Color bgc;
-  final Text text;
+  final String markText;
+  final FontWeight fontWeight;
+  final Color markTextColor;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: width,
-      height: height,
-      margin: margin,
-      padding: padding,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: bgc,
-        shape: shape,
+    return Text(
+      markText,
+      style: TextStyle(
+        fontWeight: fontWeight,
+        color: markTextColor,
       ),
-      child: text,
     );
   }
 }
