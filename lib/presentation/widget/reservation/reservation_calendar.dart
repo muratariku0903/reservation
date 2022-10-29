@@ -38,7 +38,7 @@ class ReservationCalendarState extends State<ReservationCalendar> {
           rowHeight: 70,
           daysOfWeekHeight: 50,
           headerStyle: createHeaderStyle(), // headerはheaderTitleBuilderでカスタマイズできるかも
-          eventLoader: (day) => [_sampleData[day.millisecondsSinceEpoch]!],
+          eventLoader: (day) => [_sampleData[day.subtract(const Duration(hours: 9)).millisecondsSinceEpoch]!],
           calendarBuilders: CalendarBuilders(
             todayBuilder: (context, day, focusedDay) => Container(),
             outsideBuilder: (context, day, focusedDay) => Container(),
@@ -49,11 +49,12 @@ class ReservationCalendarState extends State<ReservationCalendar> {
           ),
           enabledDayPredicate: (day) => day.month == _focusedDay.month,
           onDaySelected: (selectedDay, focusedDay) {
-            final Availability availability = _sampleData[selectedDay.millisecondsSinceEpoch]!;
+            final Availability availability =
+                _sampleData[selectedDay.subtract(const Duration(hours: 9)).millisecondsSinceEpoch]!;
             bool isAvailableDay = _isAvailableDay(selectedDay, availability.isAvailable());
             if (isAvailableDay) {
               setState(() {
-                _selectedAvailabilityItems = availability.values();
+                _selectedAvailabilityItems = availability.items;
               });
             }
           },
