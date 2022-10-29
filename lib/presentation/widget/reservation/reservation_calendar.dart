@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:intl/intl.dart';
 import 'package:nholiday_jp/nholiday_jp.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -7,7 +8,11 @@ import '../common/encircle_text.dart';
 import 'data.dart';
 
 class ReservationCalendar extends StatefulWidget {
-  const ReservationCalendar({Key? key}) : super(key: key);
+  const ReservationCalendar({
+    Key? key,
+    required this.scrollController,
+  }) : super(key: key);
+  final ScrollController scrollController;
 
   @override
   State<ReservationCalendar> createState() => ReservationCalendarState();
@@ -18,6 +23,10 @@ class ReservationCalendarState extends State<ReservationCalendar> {
   List<AvailabilityItem> _selectedAvailabilityItems = [];
   AvailabilityItem? _selectedAvailabilityItem;
   Map<int, Availability> _sampleData = {};
+
+  AvailabilityItem? value() {
+    return _selectedAvailabilityItem;
+  }
 
   @override
   void initState() {
@@ -55,6 +64,13 @@ class ReservationCalendarState extends State<ReservationCalendar> {
             if (isAvailableDay) {
               setState(() {
                 _selectedAvailabilityItems = availability.items;
+              });
+              SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+                widget.scrollController.animateTo(
+                  widget.scrollController.position.maxScrollExtent,
+                  duration: const Duration(seconds: 1),
+                  curve: Curves.ease,
+                );
               });
             }
           },
@@ -164,7 +180,7 @@ class ReservationCalendarState extends State<ReservationCalendar> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('${availabilityItem.startHour()}:00~${availabilityItem.endHour()}:00'),
-              Text('空き状況 :  ${convertLevelToMark(availabilityItem.availabilityLevel)}'),
+              Text('Acceptable :  ${convertLevelToMark(availabilityItem.availabilityLevel)}'),
             ],
           ),
         ),
@@ -184,7 +200,7 @@ class ReservationCalendarState extends State<ReservationCalendar> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          '選択された日時',
+          'selected date',
           style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.bold,
