@@ -10,10 +10,10 @@ class ReservationCalendar extends StatefulWidget {
   const ReservationCalendar({Key? key}) : super(key: key);
 
   @override
-  State<ReservationCalendar> createState() => _ReservationCalendarState();
+  State<ReservationCalendar> createState() => ReservationCalendarState();
 }
 
-class _ReservationCalendarState extends State<ReservationCalendar> {
+class ReservationCalendarState extends State<ReservationCalendar> {
   DateTime _focusedDay = DateTime.now();
   List<AvailabilityItem> _selectedAvailabilityItems = [];
   AvailabilityItem? _selectedAvailabilityItem;
@@ -28,30 +28,34 @@ class _ReservationCalendarState extends State<ReservationCalendar> {
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         TableCalendar(
           focusedDay: _focusedDay,
-          firstDay: DateTime.utc(2010, 1, 1), // TODO: 要検討
-          lastDay: DateTime.utc(2030, 1, 1), // TODO: 要検討
+          firstDay: DateTime.utc(2010, 1, 1),
+          lastDay: DateTime.utc(2030, 1, 1),
           locale: 'ja_JP',
           rowHeight: 70,
           daysOfWeekHeight: 50,
-          headerStyle: _createHeaderStyle(), // headerはheaderTitleBuilderでカスタマイズできるかも
+          headerStyle: createHeaderStyle(), // headerはheaderTitleBuilderでカスタマイズできるかも
           eventLoader: (day) => [_sampleData[day.millisecondsSinceEpoch]!],
           calendarBuilders: CalendarBuilders(
             todayBuilder: (context, day, focusedDay) => Container(),
             outsideBuilder: (context, day, focusedDay) => Container(),
             disabledBuilder: (context, day, focusedDay) => Container(),
             defaultBuilder: (context, day, focusedDay) => Container(),
-            markerBuilder: _markerBuilder,
-            dowBuilder: _daysOfWeekBuilder,
+            markerBuilder: markerBuilder,
+            dowBuilder: daysOfWeekBuilder,
           ),
           enabledDayPredicate: (day) => day.month == _focusedDay.month,
           onDaySelected: (selectedDay, focusedDay) {
             final Availability availability = _sampleData[selectedDay.millisecondsSinceEpoch]!;
-            setState(() {
-              _selectedAvailabilityItems = availability.values();
-            });
+            bool isAvailableDay = _isAvailableDay(selectedDay, availability.isAvailable());
+            if (isAvailableDay) {
+              setState(() {
+                _selectedAvailabilityItems = availability.values();
+              });
+            }
           },
           onPageChanged: (focusedDay) {
             setState(() {
@@ -64,18 +68,18 @@ class _ReservationCalendarState extends State<ReservationCalendar> {
         ),
         const SizedBox(height: 20),
         if (_selectedAvailabilityItems.isNotEmpty) ...[
-          _createListView(_selectedAvailabilityItems),
+          createListView(_selectedAvailabilityItems),
           const SizedBox(height: 20)
         ],
         if (_selectedAvailabilityItem != null) ...[
           const SizedBox(height: 10),
-          _createResult(_selectedAvailabilityItem!),
+          createResult(_selectedAvailabilityItem!),
         ],
       ],
     );
   }
 
-  HeaderStyle _createHeaderStyle() {
+  HeaderStyle createHeaderStyle() {
     Color textColor = Colors.white;
 
     return HeaderStyle(
@@ -94,7 +98,7 @@ class _ReservationCalendarState extends State<ReservationCalendar> {
     );
   }
 
-  Widget _daysOfWeekBuilder(BuildContext context, DateTime day) {
+  Widget daysOfWeekBuilder(BuildContext context, DateTime day) {
     final languageCode = Localizations.localeOf(context).languageCode;
     final text =
         const DaysOfWeekStyle().dowTextFormatter?.call(day, languageCode) ?? DateFormat.E(languageCode).format(day);
@@ -110,44 +114,42 @@ class _ReservationCalendarState extends State<ReservationCalendar> {
     );
   }
 
-  Widget _markerBuilder(BuildContext context, DateTime day, List<Availability> availabilityList) {
+  Widget markerBuilder(BuildContext context, DateTime day, List<Availability> availabilityList) {
     Availability availability = availabilityList[0];
-    bool isToday = _isToday(day);
-    bool isHoliday = _isHoliday(day);
-    bool isAvailable = availability.isAvailable() && !isHoliday;
+    bool isAvailableDay = _isAvailableDay(day, availability.isAvailable());
 
     CustomCalendarDayText customDayText = CustomCalendarDayText(
       dayText: day.day.toString(),
-      dayTextColor: isAvailable ? Colors.black : Colors.black38,
-      dayTextWeight: isToday ? FontWeight.bold : FontWeight.w700,
-      encircle: isToday,
+      dayTextColor: isAvailableDay ? Colors.black : Colors.black38,
+      dayTextWeight: isToday(day) ? FontWeight.bold : FontWeight.w700,
+      encircle: isToday(day),
     );
 
     CustomCalendarMark customMark = CustomCalendarMark(
-      markText: _convertLevelToMark(availability.level()),
-      fontWeight: isAvailable ? FontWeight.bold : FontWeight.normal,
+      markText: isAvailableDay ? convertLevelToMark(availability.level()) : '-',
+      fontWeight: isAvailableDay ? FontWeight.bold : FontWeight.normal,
     );
 
     return CustomCalendarCell(
       dayText: customDayText,
       mark: customMark,
-      bgc: isAvailable ? Colors.white : Colors.grey,
-      gap: isToday ? 2 : 5,
+      bgc: isAvailableDay ? Colors.white : Colors.grey,
+      gap: isToday(day) ? 2 : 5,
     );
   }
 
-  Widget _createListView(List<AvailabilityItem> availabilityItems) {
+  Widget createListView(List<AvailabilityItem> availabilityItems) {
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: availabilityItems.length,
       itemBuilder: (context, idx) {
-        return _createCard(availabilityItems[idx]);
+        return createCard(availabilityItems[idx]);
       },
     );
   }
 
-  Widget _createCard(AvailabilityItem availabilityItem) {
+  Widget createCard(AvailabilityItem availabilityItem) {
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -161,7 +163,7 @@ class _ReservationCalendarState extends State<ReservationCalendar> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('${availabilityItem.startHour()}:00~${availabilityItem.endHour()}:00'),
-              Text('空き状況 :  ${_convertLevelToMark(availabilityItem.availabilityLevel)}'),
+              Text('空き状況 :  ${convertLevelToMark(availabilityItem.availabilityLevel)}'),
             ],
           ),
         ),
@@ -169,7 +171,7 @@ class _ReservationCalendarState extends State<ReservationCalendar> {
     );
   }
 
-  Widget _createResult(AvailabilityItem availabilityItem) {
+  Widget createResult(AvailabilityItem availabilityItem) {
     int year = availabilityItem.year();
     int month = availabilityItem.month();
     int day = availabilityItem.day();
@@ -177,35 +179,57 @@ class _ReservationCalendarState extends State<ReservationCalendar> {
     int endH = availabilityItem.endHour();
     String text = '$year年 $month月 $day日 $startH:00~$endH:00';
 
-    return Container(
-      alignment: Alignment.centerLeft,
-      child: Column(
-        children: [
-          const Text(
-            '選択された日時',
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
-            ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          '選択された日時',
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.bold,
           ),
-          Text(text),
-        ],
-      ),
+        ),
+        Text(text),
+      ],
     );
   }
 
-  static _isHoliday(DateTime day) {
+  static DateTime getNextBusinessDay(DateTime from) {
+    DateTime day = from.add(const Duration(days: 1));
+
+    return isHoliday(day) ? getNextBusinessDay(day) : day;
+  }
+
+  static bool _isAvailableDay(DateTime day, bool isAcceptable) {
+    if (!isAcceptable) return false;
+    if (isHoliday(day)) return false;
+    if (!isValidRangeDay(day)) return false;
+
+    return true;
+  }
+
+  static bool isHoliday(DateTime day) {
     if (day.weekday == DateTime.sunday || day.weekday == DateTime.monday) return true;
-    if (_isJapaneseHoliday(day)) return true;
+    if (isJapaneseHoliday(day)) return true;
 
     return false;
   }
 
-  static bool _isToday(DateTime day) {
+  static bool isValidRangeDay(DateTime day, {DateTime? from, DateTime? startBusinessDay, int dayCnt = 60}) {
+    from = from ?? DateTime.now();
+    if (day.isBefore(from)) return false;
+    startBusinessDay = startBusinessDay ?? getNextBusinessDay(from);
+    DateTime lastBusinessDay = startBusinessDay.add(Duration(days: dayCnt));
+    if (day.isAfter(lastBusinessDay)) return false;
+
+    return true;
+  }
+
+  static bool isToday(DateTime day) {
     return isSameDay(DateTime.now(), day);
   }
 
-  static bool _isJapaneseHoliday(DateTime day) {
+  static bool isJapaneseHoliday(DateTime day) {
     try {
       return NHolidayJp.getName(day.year, day.month, day.day).isNotEmpty;
     } catch (e) {
@@ -213,7 +237,7 @@ class _ReservationCalendarState extends State<ReservationCalendar> {
     }
   }
 
-  static _convertLevelToMark(int level) {
+  static String convertLevelToMark(int level) {
     switch (level) {
       case 0:
         return '×';
