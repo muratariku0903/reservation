@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:nholiday_jp/nholiday_jp.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 import '../common/encircle_text.dart';
@@ -111,8 +112,9 @@ class _ReservationCalendarState extends State<ReservationCalendar> {
 
   Widget _markerBuilder(BuildContext context, DateTime day, List<Availability> availabilityList) {
     Availability availability = availabilityList[0];
-    bool isAvailable = availability.isAvailable();
     bool isToday = _isToday(day);
+    bool isHoliday = _isHoliday(day);
+    bool isAvailable = availability.isAvailable() && !isHoliday;
 
     CustomCalendarDayText customDayText = CustomCalendarDayText(
       dayText: day.day.toString(),
@@ -192,8 +194,23 @@ class _ReservationCalendarState extends State<ReservationCalendar> {
     );
   }
 
+  static _isHoliday(DateTime day) {
+    if (day.weekday == DateTime.sunday || day.weekday == DateTime.monday) return true;
+    if (_isJapaneseHoliday(day)) return true;
+
+    return false;
+  }
+
   static bool _isToday(DateTime day) {
     return isSameDay(DateTime.now(), day);
+  }
+
+  static bool _isJapaneseHoliday(DateTime day) {
+    try {
+      return NHolidayJp.getName(day.year, day.month, day.day).isNotEmpty;
+    } catch (e) {
+      return false;
+    }
   }
 
   static _convertLevelToMark(int level) {

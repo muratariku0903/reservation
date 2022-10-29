@@ -15,7 +15,8 @@ class Availability {
   }
 
   int level() {
-    return (morning.availabilityLevel + noon.availabilityLevel + afternoon.availabilityLevel) ~/ 3;
+    return 1;
+    // return (morning.availabilityLevel + noon.availabilityLevel + afternoon.availabilityLevel) ~/ 3;
   }
 
   List<AvailabilityItem> values() {
