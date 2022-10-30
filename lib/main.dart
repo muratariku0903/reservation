@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:syncfusion_localizations/syncfusion_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
@@ -7,7 +8,11 @@ import 'presentation/pages/reservation/reservation_page.dart';
 import 'presentation/pages/signup/signup_page.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    const ProviderScope(
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {

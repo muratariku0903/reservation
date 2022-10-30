@@ -10,8 +10,11 @@ import 'data.dart';
 class ReservationCalendar extends StatefulWidget {
   const ReservationCalendar({
     Key? key,
+    required this.cardTapCallback,
     required this.scrollController,
+    // required this.dateTapCallback,
   }) : super(key: key);
+  final Function cardTapCallback;
   final ScrollController scrollController;
 
   @override
@@ -173,6 +176,7 @@ class ReservationCalendarState extends State<ReservationCalendar> {
         setState(() {
           _selectedAvailabilityItem = availabilityItem;
         });
+        widget.cardTapCallback();
       },
       child: Card(
         child: Padding(
