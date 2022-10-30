@@ -28,41 +28,46 @@ mixin _$SignUpState {
 abstract class $SignUpStateCopyWith<$Res> {
   factory $SignUpStateCopyWith(
           SignUpState value, $Res Function(SignUpState) then) =
-      _$SignUpStateCopyWithImpl<$Res>;
+      _$SignUpStateCopyWithImpl<$Res, SignUpState>;
+  @useResult
   $Res call({User user, SignUpStatus status});
 
   $UserCopyWith<$Res> get user;
 }
 
 /// @nodoc
-class _$SignUpStateCopyWithImpl<$Res> implements $SignUpStateCopyWith<$Res> {
+class _$SignUpStateCopyWithImpl<$Res, $Val extends SignUpState>
+    implements $SignUpStateCopyWith<$Res> {
   _$SignUpStateCopyWithImpl(this._value, this._then);
 
-  final SignUpState _value;
   // ignore: unused_field
-  final $Res Function(SignUpState) _then;
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
 
+  @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? user = freezed,
-    Object? status = freezed,
+    Object? user = null,
+    Object? status = null,
   }) {
     return _then(_value.copyWith(
-      user: user == freezed
+      user: null == user
           ? _value.user
           : user // ignore: cast_nullable_to_non_nullable
               as User,
-      status: status == freezed
+      status: null == status
           ? _value.status
           : status // ignore: cast_nullable_to_non_nullable
               as SignUpStatus,
-    ));
+    ) as $Val);
   }
 
   @override
+  @pragma('vm:prefer-inline')
   $UserCopyWith<$Res> get user {
     return $UserCopyWith<$Res>(_value.user, (value) {
-      return _then(_value.copyWith(user: value));
+      return _then(_value.copyWith(user: value) as $Val);
     });
   }
 }
@@ -74,6 +79,7 @@ abstract class _$$_SignUpStateCopyWith<$Res>
           _$_SignUpState value, $Res Function(_$_SignUpState) then) =
       __$$_SignUpStateCopyWithImpl<$Res>;
   @override
+  @useResult
   $Res call({User user, SignUpStatus status});
 
   @override
@@ -81,26 +87,25 @@ abstract class _$$_SignUpStateCopyWith<$Res>
 }
 
 /// @nodoc
-class __$$_SignUpStateCopyWithImpl<$Res> extends _$SignUpStateCopyWithImpl<$Res>
+class __$$_SignUpStateCopyWithImpl<$Res>
+    extends _$SignUpStateCopyWithImpl<$Res, _$_SignUpState>
     implements _$$_SignUpStateCopyWith<$Res> {
   __$$_SignUpStateCopyWithImpl(
       _$_SignUpState _value, $Res Function(_$_SignUpState) _then)
-      : super(_value, (v) => _then(v as _$_SignUpState));
+      : super(_value, _then);
 
-  @override
-  _$_SignUpState get _value => super._value as _$_SignUpState;
-
+  @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? user = freezed,
-    Object? status = freezed,
+    Object? user = null,
+    Object? status = null,
   }) {
     return _then(_$_SignUpState(
-      user: user == freezed
+      user: null == user
           ? _value.user
           : user // ignore: cast_nullable_to_non_nullable
               as User,
-      status: status == freezed
+      status: null == status
           ? _value.status
           : status // ignore: cast_nullable_to_non_nullable
               as SignUpStatus,
@@ -131,18 +136,16 @@ class _$_SignUpState implements _SignUpState {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$_SignUpState &&
-            const DeepCollectionEquality().equals(other.user, user) &&
-            const DeepCollectionEquality().equals(other.status, status));
+            (identical(other.user, user) || other.user == user) &&
+            (identical(other.status, status) || other.status == status));
   }
 
   @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      const DeepCollectionEquality().hash(user),
-      const DeepCollectionEquality().hash(status));
+  int get hashCode => Object.hash(runtimeType, user, status);
 
   @JsonKey(ignore: true)
   @override
+  @pragma('vm:prefer-inline')
   _$$_SignUpStateCopyWith<_$_SignUpState> get copyWith =>
       __$$_SignUpStateCopyWithImpl<_$_SignUpState>(this, _$identity);
 }
