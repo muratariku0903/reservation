@@ -46,7 +46,7 @@ class ReservationCalendarState extends State<ReservationCalendar> {
           locale: 'ja_JP',
           rowHeight: 70,
           daysOfWeekHeight: 50,
-          headerStyle: createHeaderStyle(), // headerはheaderTitleBuilderでカスタマイズできるかも
+          headerStyle: createHeaderStyle(),
           eventLoader: (day) => [_sampleData[day.subtract(const Duration(hours: 9)).millisecondsSinceEpoch]!],
           calendarBuilders: CalendarBuilders(
             todayBuilder: (context, day, focusedDay) => Container(),
@@ -60,7 +60,7 @@ class ReservationCalendarState extends State<ReservationCalendar> {
           onDaySelected: (selectedDay, focusedDay) {
             final Availability availability =
                 _sampleData[selectedDay.subtract(const Duration(hours: 9)).millisecondsSinceEpoch]!;
-            bool isAvailableDay = _isAvailableDay(selectedDay, availability.isAvailable());
+            bool isAvailableDay = _isBusinessDay(selectedDay) && availability.isAvailable();
             if (isAvailableDay) {
               setState(() {
                 _selectedAvailabilityItems = availability.items;
@@ -133,13 +133,14 @@ class ReservationCalendarState extends State<ReservationCalendar> {
 
   Widget markerBuilder(BuildContext context, DateTime day, List<Availability> availabilityList) {
     Availability availability = availabilityList[0];
-    bool isAvailableDay = _isAvailableDay(day, availability.isAvailable());
+    bool isAvailableDay = _isBusinessDay(day) && availability.isAvailable();
+    bool isToday = isSameDay(day, DateTime.now());
 
     CustomCalendarDayText customDayText = CustomCalendarDayText(
       dayText: day.day.toString(),
       dayTextColor: isAvailableDay ? Colors.black : Colors.black38,
-      dayTextWeight: isToday(day) ? FontWeight.bold : FontWeight.w700,
-      encircle: isToday(day),
+      dayTextWeight: isToday ? FontWeight.bold : FontWeight.w700,
+      encircle: isToday,
     );
 
     CustomCalendarMark customMark = CustomCalendarMark(
@@ -151,7 +152,7 @@ class ReservationCalendarState extends State<ReservationCalendar> {
       dayText: customDayText,
       mark: customMark,
       bgc: isAvailableDay ? Colors.white : Colors.grey,
-      gap: isToday(day) ? 2 : 5,
+      gap: isToday ? 2 : 5,
     );
   }
 
@@ -217,8 +218,7 @@ class ReservationCalendarState extends State<ReservationCalendar> {
     return isHoliday(day) ? getNextBusinessDay(day) : day;
   }
 
-  static bool _isAvailableDay(DateTime day, bool isAcceptable) {
-    if (!isAcceptable) return false;
+  static bool _isBusinessDay(DateTime day) {
     if (isHoliday(day)) return false;
     if (!isValidRangeDay(day)) return false;
 
@@ -240,10 +240,6 @@ class ReservationCalendarState extends State<ReservationCalendar> {
     if (day.isAfter(lastBusinessDay)) return false;
 
     return true;
-  }
-
-  static bool isToday(DateTime day) {
-    return isSameDay(DateTime.now(), day);
   }
 
   static bool isJapaneseHoliday(DateTime day) {
