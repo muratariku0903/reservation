@@ -12,7 +12,6 @@ class ReservationCalendar extends StatefulWidget {
     Key? key,
     required this.cardTapCallback,
     required this.scrollController,
-    // required this.dateTapCallback,
   }) : super(key: key);
   final Function cardTapCallback;
   final ScrollController scrollController;
@@ -71,7 +70,7 @@ class ReservationCalendarState extends State<ReservationCalendar> {
               SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
                 widget.scrollController.animateTo(
                   widget.scrollController.position.maxScrollExtent,
-                  duration: const Duration(seconds: 1),
+                  duration: const Duration(milliseconds: 500),
                   curve: Curves.ease,
                 );
               });
@@ -147,7 +146,7 @@ class ReservationCalendarState extends State<ReservationCalendar> {
     );
 
     CustomCalendarMark customMark = CustomCalendarMark(
-      markText: isAvailableDay ? convertLevelToMark(availability.level()) : '-',
+      markText: _isBusinessDay(day) ? convertLevelToMark(availability.level()) : '-',
       fontWeight: isAvailableDay ? FontWeight.bold : FontWeight.normal,
     );
 

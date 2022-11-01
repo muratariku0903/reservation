@@ -32,8 +32,9 @@ class ReservationForm extends ConsumerWidget {
             ),
             if (ref.watch(_ScreenState.validationStatusProvider) == _ValidationStatus.error)
               Container(
-                color: Colors.amber,
-                height: 200,
+                color: Colors.deepOrange,
+                height: 100,
+                alignment: Alignment.center,
                 child: const Text('error'),
               ),
             TextButton(

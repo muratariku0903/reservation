@@ -11,8 +11,12 @@ class Availability {
   }
 
   int level() {
-    return 1;
-    // return (morning.availabilityLevel + noon.availabilityLevel + afternoon.availabilityLevel) ~/ 3;
+    int total = 0;
+    for (AvailabilityItem item in items) {
+      total += item.availabilityLevel;
+    }
+
+    return total ~/ items.length;
   }
 }
 
