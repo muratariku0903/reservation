@@ -42,6 +42,7 @@ class ReservationCalendarState extends State<ReservationCalendar> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         TableCalendar(
+          availableGestures: AvailableGestures.horizontalSwipe,
           focusedDay: _focusedDay,
           firstDay: DateTime.utc(2010, 1, 1),
           lastDay: DateTime.utc(2030, 1, 1),

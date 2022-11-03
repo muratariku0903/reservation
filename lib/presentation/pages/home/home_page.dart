@@ -37,19 +37,16 @@ class HomePage extends StatelessWidget {
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
-            Container(
-              color: Colors.red,
-              child: TextButton(
-                style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.all(Colors.blue),
-                ),
-                onPressed: () {
-                  Navigator.pushNamed(context, '/reservation');
-                },
-                child: const Text(
-                  'move reservation page.',
-                  style: TextStyle(color: Colors.white),
-                ),
+            TextButton(
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all(Colors.blue),
+              ),
+              onPressed: () {
+                Navigator.pushNamed(context, '/reservation');
+              },
+              child: const Text(
+                'move reservation page.',
+                style: TextStyle(color: Colors.white),
               ),
             ),
           ],
