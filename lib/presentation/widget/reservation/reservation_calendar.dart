@@ -10,9 +10,11 @@ import 'data.dart';
 class ReservationCalendar extends StatefulWidget {
   const ReservationCalendar({
     Key? key,
+    required this.fetchDataCallback,
     required this.cardTapCallback,
     required this.scrollController,
   }) : super(key: key);
+  final Function(int officeCode) fetchDataCallback;
   final Function cardTapCallback;
   final ScrollController scrollController;
 
@@ -33,7 +35,14 @@ class ReservationCalendarState extends State<ReservationCalendar> {
   @override
   void initState() {
     _sampleData = createSampleData(_focusedDay);
+    setData();
     super.initState();
+  }
+
+  void setData() async {
+    print('start fetch');
+    await widget.fetchDataCallback(1);
+    print('end fetch');
   }
 
   @override

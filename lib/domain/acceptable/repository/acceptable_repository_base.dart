@@ -1,5 +1,5 @@
-import '../model/acceptable.dart';
+import '../model/time_acceptable.dart';
 
 abstract class AcceptableRepositoryBase {
-  Future<Map<int, DateAcceptable>> fetch(String id);
+  Future<List<TimeAcceptable>> fetch(int officeCode);
 }

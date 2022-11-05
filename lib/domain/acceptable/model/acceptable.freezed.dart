@@ -16,8 +16,8 @@ final _privateConstructorUsedError = UnsupportedError(
 
 /// @nodoc
 mixin _$Acceptable {
-  String get departmentId => throw _privateConstructorUsedError;
-  Map<int, DateAcceptable> get data => throw _privateConstructorUsedError;
+  int get officeCode => throw _privateConstructorUsedError;
+  List<TimeAcceptable> get list => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $AcceptableCopyWith<Acceptable> get copyWith =>
@@ -30,7 +30,7 @@ abstract class $AcceptableCopyWith<$Res> {
           Acceptable value, $Res Function(Acceptable) then) =
       _$AcceptableCopyWithImpl<$Res, Acceptable>;
   @useResult
-  $Res call({String departmentId, Map<int, DateAcceptable> data});
+  $Res call({int officeCode, List<TimeAcceptable> list});
 }
 
 /// @nodoc
@@ -46,18 +46,18 @@ class _$AcceptableCopyWithImpl<$Res, $Val extends Acceptable>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? departmentId = null,
-    Object? data = null,
+    Object? officeCode = null,
+    Object? list = null,
   }) {
     return _then(_value.copyWith(
-      departmentId: null == departmentId
-          ? _value.departmentId
-          : departmentId // ignore: cast_nullable_to_non_nullable
-              as String,
-      data: null == data
-          ? _value.data
-          : data // ignore: cast_nullable_to_non_nullable
-              as Map<int, DateAcceptable>,
+      officeCode: null == officeCode
+          ? _value.officeCode
+          : officeCode // ignore: cast_nullable_to_non_nullable
+              as int,
+      list: null == list
+          ? _value.list
+          : list // ignore: cast_nullable_to_non_nullable
+              as List<TimeAcceptable>,
     ) as $Val);
   }
 }
@@ -70,7 +70,7 @@ abstract class _$$_AcceptableCopyWith<$Res>
       __$$_AcceptableCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String departmentId, Map<int, DateAcceptable> data});
+  $Res call({int officeCode, List<TimeAcceptable> list});
 }
 
 /// @nodoc
@@ -84,18 +84,18 @@ class __$$_AcceptableCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? departmentId = null,
-    Object? data = null,
+    Object? officeCode = null,
+    Object? list = null,
   }) {
     return _then(_$_Acceptable(
-      departmentId: null == departmentId
-          ? _value.departmentId
-          : departmentId // ignore: cast_nullable_to_non_nullable
-              as String,
-      data: null == data
-          ? _value._data
-          : data // ignore: cast_nullable_to_non_nullable
-              as Map<int, DateAcceptable>,
+      officeCode: null == officeCode
+          ? _value.officeCode
+          : officeCode // ignore: cast_nullable_to_non_nullable
+              as int,
+      list: null == list
+          ? _value._list
+          : list // ignore: cast_nullable_to_non_nullable
+              as List<TimeAcceptable>,
     ));
   }
 }
@@ -104,23 +104,22 @@ class __$$_AcceptableCopyWithImpl<$Res>
 
 class _$_Acceptable implements _Acceptable {
   const _$_Acceptable(
-      {this.departmentId = '', final Map<int, DateAcceptable> data = const {}})
-      : _data = data;
+      {required this.officeCode, final List<TimeAcceptable> list = const []})
+      : _list = list;
 
   @override
-  @JsonKey()
-  final String departmentId;
-  final Map<int, DateAcceptable> _data;
+  final int officeCode;
+  final List<TimeAcceptable> _list;
   @override
   @JsonKey()
-  Map<int, DateAcceptable> get data {
+  List<TimeAcceptable> get list {
     // ignore: implicit_dynamic_type
-    return EqualUnmodifiableMapView(_data);
+    return EqualUnmodifiableListView(_list);
   }
 
   @override
   String toString() {
-    return 'Acceptable(departmentId: $departmentId, data: $data)';
+    return 'Acceptable(officeCode: $officeCode, list: $list)';
   }
 
   @override
@@ -128,14 +127,14 @@ class _$_Acceptable implements _Acceptable {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$_Acceptable &&
-            (identical(other.departmentId, departmentId) ||
-                other.departmentId == departmentId) &&
-            const DeepCollectionEquality().equals(other._data, _data));
+            (identical(other.officeCode, officeCode) ||
+                other.officeCode == officeCode) &&
+            const DeepCollectionEquality().equals(other._list, _list));
   }
 
   @override
   int get hashCode => Object.hash(
-      runtimeType, departmentId, const DeepCollectionEquality().hash(_data));
+      runtimeType, officeCode, const DeepCollectionEquality().hash(_list));
 
   @JsonKey(ignore: true)
   @override
@@ -146,13 +145,13 @@ class _$_Acceptable implements _Acceptable {
 
 abstract class _Acceptable implements Acceptable {
   const factory _Acceptable(
-      {final String departmentId,
-      final Map<int, DateAcceptable> data}) = _$_Acceptable;
+      {required final int officeCode,
+      final List<TimeAcceptable> list}) = _$_Acceptable;
 
   @override
-  String get departmentId;
+  int get officeCode;
   @override
-  Map<int, DateAcceptable> get data;
+  List<TimeAcceptable> get list;
   @override
   @JsonKey(ignore: true)
   _$$_AcceptableCopyWith<_$_Acceptable> get copyWith =>

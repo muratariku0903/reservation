@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:reservation/presentation/pages/reservation/controller/reservation_controller.dart';
 
 import 'reservation_calendar.dart';
 
@@ -14,6 +15,10 @@ class ReservationForm extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final GlobalObjectKey<ReservationCalendarState> calendarKey = GlobalObjectKey<ReservationCalendarState>(context);
 
+    Future<void> fetchAcceptableList(int officeCode) async {
+      await ref.watch(reservationControllerProvider.notifier).fetchAcceptableList(officeCode);
+    }
+
     void setValidationStatus(_ValidationStatus validationStatus) {
       ref.watch(_ScreenState.validationStatusProvider.notifier).state = validationStatus;
     }
@@ -27,6 +32,7 @@ class ReservationForm extends ConsumerWidget {
             const SizedBox(height: 20),
             ReservationCalendar(
               key: calendarKey,
+              fetchDataCallback: fetchAcceptableList,
               cardTapCallback: () => setValidationStatus(_ValidationStatus.clear),
               scrollController: scrollController,
             ),
