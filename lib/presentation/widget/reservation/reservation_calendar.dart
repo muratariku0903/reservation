@@ -52,6 +52,8 @@ class ReservationCalendarState extends State<ReservationCalendar> {
 
   @override
   Widget build(BuildContext context) {
+    print(_sampleData);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -66,6 +68,7 @@ class ReservationCalendarState extends State<ReservationCalendar> {
             daysOfWeekHeight: 50,
             headerStyle: createHeaderStyle(),
             eventLoader: (day) {
+              print(day.subtract(const Duration(hours: 9)).millisecondsSinceEpoch);
               return [_sampleData[day.subtract(const Duration(hours: 9)).millisecondsSinceEpoch]!];
             },
             calendarBuilders: CalendarBuilders(

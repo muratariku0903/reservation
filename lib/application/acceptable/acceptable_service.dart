@@ -11,7 +11,6 @@ class AcceptableService {
     required this.timeAcceptableRepository,
     required this.holidayRepository,
   });
-
   final TimeAcceptableRepositoryBase timeAcceptableRepository;
   final HolidayRepositoryBase holidayRepository;
   final Logger logger = Logger();
