@@ -4,6 +4,9 @@ import 'package:intl/intl.dart';
 import 'package:nholiday_jp/nholiday_jp.dart';
 import 'package:table_calendar/table_calendar.dart';
 
+import '../../../domain/acceptable/model/acceptable.dart';
+import '../../../domain/acceptable/model/holiday.dart' as HolidayModel;
+import '../../../domain/acceptable/model/time_acceptable.dart';
 import '../common/encircle_text.dart';
 import 'data.dart';
 
@@ -14,7 +17,7 @@ class ReservationCalendar extends StatefulWidget {
     required this.cardTapCallback,
     required this.scrollController,
   }) : super(key: key);
-  final Function(int officeCode) fetchDataCallback;
+  final Future<Acceptable> Function(int officeCode, DateTime day) fetchDataCallback;
   final Function cardTapCallback;
   final ScrollController scrollController;
 
@@ -27,6 +30,7 @@ class ReservationCalendarState extends State<ReservationCalendar> {
   List<AvailabilityItem> _selectedAvailabilityItems = [];
   AvailabilityItem? _selectedAvailabilityItem;
   Map<int, Availability> _sampleData = {};
+  Map<int, HolidayModel.Holiday> _holidays = {};
 
   AvailabilityItem? value() {
     return _selectedAvailabilityItem;
@@ -34,15 +38,16 @@ class ReservationCalendarState extends State<ReservationCalendar> {
 
   @override
   void initState() {
-    _sampleData = createSampleData(_focusedDay);
     setData();
     super.initState();
   }
 
   void setData() async {
-    print('start fetch');
-    await widget.fetchDataCallback(1);
-    print('end fetch');
+    Acceptable acceptable = await widget.fetchDataCallback(1, getNextBusinessDay(DateTime.now()));
+    setState(() {
+      _sampleData = convertTimeAcceptableList(acceptable.timeAcceptableList);
+      _holidays = acceptable.holidayList;
+    });
   }
 
   @override
@@ -50,51 +55,54 @@ class ReservationCalendarState extends State<ReservationCalendar> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        TableCalendar(
-          availableGestures: AvailableGestures.horizontalSwipe,
-          focusedDay: _focusedDay,
-          firstDay: DateTime.utc(2010, 1, 1),
-          lastDay: DateTime.utc(2030, 1, 1),
-          locale: 'ja_JP',
-          rowHeight: 70,
-          daysOfWeekHeight: 50,
-          headerStyle: createHeaderStyle(),
-          eventLoader: (day) => [_sampleData[day.subtract(const Duration(hours: 9)).millisecondsSinceEpoch]!],
-          calendarBuilders: CalendarBuilders(
-            todayBuilder: (context, day, focusedDay) => Container(),
-            outsideBuilder: (context, day, focusedDay) => Container(),
-            disabledBuilder: (context, day, focusedDay) => Container(),
-            defaultBuilder: (context, day, focusedDay) => Container(),
-            markerBuilder: markerBuilder,
-            dowBuilder: daysOfWeekBuilder,
-          ),
-          enabledDayPredicate: (day) => day.month == _focusedDay.month,
-          onDaySelected: (selectedDay, focusedDay) {
-            final Availability availability =
-                _sampleData[selectedDay.subtract(const Duration(hours: 9)).millisecondsSinceEpoch]!;
-            bool isAvailableDay = _isBusinessDay(selectedDay) && availability.isAvailable();
-            if (isAvailableDay) {
+        if (_sampleData.isNotEmpty)
+          TableCalendar(
+            availableGestures: AvailableGestures.horizontalSwipe,
+            focusedDay: _focusedDay,
+            firstDay: DateTime.utc(2010, 1, 1),
+            lastDay: DateTime.utc(2030, 1, 1),
+            locale: 'ja_JP',
+            rowHeight: 70,
+            daysOfWeekHeight: 50,
+            headerStyle: createHeaderStyle(),
+            eventLoader: (day) {
+              return [_sampleData[day.subtract(const Duration(hours: 9)).millisecondsSinceEpoch]!];
+            },
+            calendarBuilders: CalendarBuilders(
+              todayBuilder: (context, day, focusedDay) => Container(),
+              outsideBuilder: (context, day, focusedDay) => Container(),
+              disabledBuilder: (context, day, focusedDay) => Container(),
+              defaultBuilder: (context, day, focusedDay) => Container(),
+              markerBuilder: markerBuilder,
+              dowBuilder: daysOfWeekBuilder,
+            ),
+            // enabledDayPredicate: (day) => day.month == _focusedDay.month,
+            onDaySelected: (selectedDay, focusedDay) {
+              final Availability availability =
+                  _sampleData[selectedDay.subtract(const Duration(hours: 9)).millisecondsSinceEpoch]!;
+              bool isAvailableDay = _isBusinessDay(selectedDay) && availability.isAvailable();
+              if (isAvailableDay) {
+                setState(() {
+                  _selectedAvailabilityItems = availability.items;
+                });
+                SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+                  widget.scrollController.animateTo(
+                    widget.scrollController.position.maxScrollExtent,
+                    duration: const Duration(milliseconds: 500),
+                    curve: Curves.ease,
+                  );
+                });
+              }
+            },
+            onPageChanged: (focusedDay) {
               setState(() {
-                _selectedAvailabilityItems = availability.items;
+                _focusedDay = focusedDay;
+                // _sampleData = createSampleData(focusedDay);
+                _selectedAvailabilityItems = [];
+                _selectedAvailabilityItem = null;
               });
-              SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
-                widget.scrollController.animateTo(
-                  widget.scrollController.position.maxScrollExtent,
-                  duration: const Duration(milliseconds: 500),
-                  curve: Curves.ease,
-                );
-              });
-            }
-          },
-          onPageChanged: (focusedDay) {
-            setState(() {
-              _focusedDay = focusedDay;
-              _sampleData = createSampleData(focusedDay);
-              _selectedAvailabilityItems = [];
-              _selectedAvailabilityItem = null;
-            });
-          },
-        ),
+            },
+          ),
         const SizedBox(height: 20),
         if (_selectedAvailabilityItems.isNotEmpty) ...[
           createListView(_selectedAvailabilityItems),
@@ -248,7 +256,7 @@ class ReservationCalendarState extends State<ReservationCalendar> {
   static bool isValidRangeDay(DateTime day, {DateTime? from, DateTime? startBusinessDay, int dayCnt = 60}) {
     from = from ?? DateTime.now();
     if (day.isBefore(from)) return false;
-    startBusinessDay = startBusinessDay ?? getNextBusinessDay(from);
+    startBusinessDay = startBusinessDay ?? getNextBusinessDay(from); // TODO ここなんかちょっと変かも
     DateTime lastBusinessDay = startBusinessDay.add(Duration(days: dayCnt));
     if (day.isAfter(lastBusinessDay)) return false;
 
@@ -264,16 +272,45 @@ class ReservationCalendarState extends State<ReservationCalendar> {
   }
 
   static String convertLevelToMark(int level) {
-    switch (level) {
-      case 0:
-        return '×';
-      case 1:
-        return '△';
-      case 2:
-        return '○';
-      default:
-        return '';
+    if (level == 0) {
+      return '×';
+    } else if (level == 1) {
+      return '△';
+    } else {
+      return '○';
     }
+  }
+
+  static Map<int, Availability> convertTimeAcceptableList(Map<String, TimeAcceptable> timeAcceptableList) {
+    Map<int, Availability> res = {};
+    int msPerHour = 60 * 60 * 1000;
+    Map<int, List<AvailabilityItem>> map = {};
+    timeAcceptableList.forEach((key, TimeAcceptable timeAcceptable) {
+      List<String> list = timeAcceptable.date.split('-');
+      DateTime timeAcceptableDate = DateTime(
+        int.parse(list[0]),
+        int.parse(list[1]),
+        int.parse(list[2].substring(0, 2)),
+      );
+      int dateMs = timeAcceptableDate.millisecondsSinceEpoch;
+      AvailabilityItem availabilityItem = AvailabilityItem(
+        startDate: dateMs + timeAcceptable.start * msPerHour,
+        endDate: dateMs + timeAcceptable.end * msPerHour,
+        availabilityLevel: timeAcceptable.maxRegisterCnt - timeAcceptable.registerCnt,
+      );
+
+      if (!map.containsKey(dateMs)) {
+        map[dateMs] = [availabilityItem];
+      } else {
+        map[dateMs] = [...map[dateMs]!, availabilityItem];
+      }
+    });
+
+    map.forEach((key, availabilityItemList) {
+      res[key] = Availability(items: availabilityItemList);
+    });
+
+    return res;
   }
 }
 

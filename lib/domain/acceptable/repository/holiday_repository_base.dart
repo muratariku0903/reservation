@@ -1,5 +1,5 @@
 import '../model/holiday.dart';
 
 abstract class HolidayRepositoryBase {
-  Future<List<Holiday>> fetch(int officeCode);
+  Future<Map<int, Holiday>> fetch(int officeCode, DateTime day);
 }

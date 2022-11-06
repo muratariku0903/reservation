@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import 'holiday.dart';
 import 'time_acceptable.dart';
 
 part 'acceptable.freezed.dart';
@@ -8,7 +9,8 @@ part 'acceptable.freezed.dart';
 class Acceptable with _$Acceptable {
   const factory Acceptable({
     required int officeCode,
-    @Default([]) List<TimeAcceptable> list,
+    @Default({}) Map<String, TimeAcceptable> timeAcceptableList,
+    @Default({}) Map<int, Holiday> holidayList,
   }) = _Acceptable;
 }
 

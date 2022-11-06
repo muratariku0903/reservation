@@ -17,7 +17,9 @@ final _privateConstructorUsedError = UnsupportedError(
 /// @nodoc
 mixin _$Acceptable {
   int get officeCode => throw _privateConstructorUsedError;
-  List<TimeAcceptable> get list => throw _privateConstructorUsedError;
+  Map<String, TimeAcceptable> get timeAcceptableList =>
+      throw _privateConstructorUsedError;
+  Map<int, Holiday> get holidayList => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $AcceptableCopyWith<Acceptable> get copyWith =>
@@ -30,7 +32,10 @@ abstract class $AcceptableCopyWith<$Res> {
           Acceptable value, $Res Function(Acceptable) then) =
       _$AcceptableCopyWithImpl<$Res, Acceptable>;
   @useResult
-  $Res call({int officeCode, List<TimeAcceptable> list});
+  $Res call(
+      {int officeCode,
+      Map<String, TimeAcceptable> timeAcceptableList,
+      Map<int, Holiday> holidayList});
 }
 
 /// @nodoc
@@ -47,17 +52,22 @@ class _$AcceptableCopyWithImpl<$Res, $Val extends Acceptable>
   @override
   $Res call({
     Object? officeCode = null,
-    Object? list = null,
+    Object? timeAcceptableList = null,
+    Object? holidayList = null,
   }) {
     return _then(_value.copyWith(
       officeCode: null == officeCode
           ? _value.officeCode
           : officeCode // ignore: cast_nullable_to_non_nullable
               as int,
-      list: null == list
-          ? _value.list
-          : list // ignore: cast_nullable_to_non_nullable
-              as List<TimeAcceptable>,
+      timeAcceptableList: null == timeAcceptableList
+          ? _value.timeAcceptableList
+          : timeAcceptableList // ignore: cast_nullable_to_non_nullable
+              as Map<String, TimeAcceptable>,
+      holidayList: null == holidayList
+          ? _value.holidayList
+          : holidayList // ignore: cast_nullable_to_non_nullable
+              as Map<int, Holiday>,
     ) as $Val);
   }
 }
@@ -70,7 +80,10 @@ abstract class _$$_AcceptableCopyWith<$Res>
       __$$_AcceptableCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({int officeCode, List<TimeAcceptable> list});
+  $Res call(
+      {int officeCode,
+      Map<String, TimeAcceptable> timeAcceptableList,
+      Map<int, Holiday> holidayList});
 }
 
 /// @nodoc
@@ -85,17 +98,22 @@ class __$$_AcceptableCopyWithImpl<$Res>
   @override
   $Res call({
     Object? officeCode = null,
-    Object? list = null,
+    Object? timeAcceptableList = null,
+    Object? holidayList = null,
   }) {
     return _then(_$_Acceptable(
       officeCode: null == officeCode
           ? _value.officeCode
           : officeCode // ignore: cast_nullable_to_non_nullable
               as int,
-      list: null == list
-          ? _value._list
-          : list // ignore: cast_nullable_to_non_nullable
-              as List<TimeAcceptable>,
+      timeAcceptableList: null == timeAcceptableList
+          ? _value._timeAcceptableList
+          : timeAcceptableList // ignore: cast_nullable_to_non_nullable
+              as Map<String, TimeAcceptable>,
+      holidayList: null == holidayList
+          ? _value._holidayList
+          : holidayList // ignore: cast_nullable_to_non_nullable
+              as Map<int, Holiday>,
     ));
   }
 }
@@ -104,22 +122,33 @@ class __$$_AcceptableCopyWithImpl<$Res>
 
 class _$_Acceptable implements _Acceptable {
   const _$_Acceptable(
-      {required this.officeCode, final List<TimeAcceptable> list = const []})
-      : _list = list;
+      {required this.officeCode,
+      final Map<String, TimeAcceptable> timeAcceptableList = const {},
+      final Map<int, Holiday> holidayList = const {}})
+      : _timeAcceptableList = timeAcceptableList,
+        _holidayList = holidayList;
 
   @override
   final int officeCode;
-  final List<TimeAcceptable> _list;
+  final Map<String, TimeAcceptable> _timeAcceptableList;
   @override
   @JsonKey()
-  List<TimeAcceptable> get list {
+  Map<String, TimeAcceptable> get timeAcceptableList {
     // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_list);
+    return EqualUnmodifiableMapView(_timeAcceptableList);
+  }
+
+  final Map<int, Holiday> _holidayList;
+  @override
+  @JsonKey()
+  Map<int, Holiday> get holidayList {
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableMapView(_holidayList);
   }
 
   @override
   String toString() {
-    return 'Acceptable(officeCode: $officeCode, list: $list)';
+    return 'Acceptable(officeCode: $officeCode, timeAcceptableList: $timeAcceptableList, holidayList: $holidayList)';
   }
 
   @override
@@ -129,12 +158,18 @@ class _$_Acceptable implements _Acceptable {
             other is _$_Acceptable &&
             (identical(other.officeCode, officeCode) ||
                 other.officeCode == officeCode) &&
-            const DeepCollectionEquality().equals(other._list, _list));
+            const DeepCollectionEquality()
+                .equals(other._timeAcceptableList, _timeAcceptableList) &&
+            const DeepCollectionEquality()
+                .equals(other._holidayList, _holidayList));
   }
 
   @override
   int get hashCode => Object.hash(
-      runtimeType, officeCode, const DeepCollectionEquality().hash(_list));
+      runtimeType,
+      officeCode,
+      const DeepCollectionEquality().hash(_timeAcceptableList),
+      const DeepCollectionEquality().hash(_holidayList));
 
   @JsonKey(ignore: true)
   @override
@@ -146,12 +181,15 @@ class _$_Acceptable implements _Acceptable {
 abstract class _Acceptable implements Acceptable {
   const factory _Acceptable(
       {required final int officeCode,
-      final List<TimeAcceptable> list}) = _$_Acceptable;
+      final Map<String, TimeAcceptable> timeAcceptableList,
+      final Map<int, Holiday> holidayList}) = _$_Acceptable;
 
   @override
   int get officeCode;
   @override
-  List<TimeAcceptable> get list;
+  Map<String, TimeAcceptable> get timeAcceptableList;
+  @override
+  Map<int, Holiday> get holidayList;
   @override
   @JsonKey(ignore: true)
   _$$_AcceptableCopyWith<_$_Acceptable> get copyWith =>

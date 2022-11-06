@@ -3,15 +3,17 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:logger/logger.dart';
 
 import '../../../../application/acceptable/acceptable_service.dart';
-import '../../../../domain/acceptable/model/time_acceptable.dart';
-import '../../../../infra/acceptable/repository/acceptable_repository_impl.dart';
+import '../../../../domain/acceptable/model/acceptable.dart';
+import '../../../../infra/acceptable/repository/holiday_repository_impl.dart';
+import '../../../../infra/acceptable/repository/time_acceptable_repository_impl.dart';
 import '../state/reservation_state.dart';
 
 final reservationControllerProvider = StateNotifierProvider<ReservationController, ReservationState>(
   (ref) => ReservationController(
     state: const ReservationState(),
     service: AcceptableService(
-      repository: AcceptableRepositoryImpl(),
+      timeAcceptableRepository: TimeAcceptableRepositoryImpl(),
+      holidayRepository: HolidayRepositoryImpl(),
     ),
   ),
 );
@@ -30,14 +32,12 @@ class ReservationController extends StateNotifier<ReservationState> {
 
   Future<void> reservation() async {}
 
-  Future<List<TimeAcceptable>> fetchAcceptableList(int officeCode) async {
+  Future<Acceptable> fetchAcceptable(int officeCode, DateTime day) async {
     try {
-      List<TimeAcceptable> res = await service.fetch(officeCode);
-      print(res.length);
-      return [];
+      return await service.fetch(officeCode, day);
     } catch (e) {
       print(e);
-      return [];
+      throw ('error');
     }
   }
 }
